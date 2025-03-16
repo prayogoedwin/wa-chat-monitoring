@@ -46,6 +46,10 @@ build/Release
 node_modules/
 jspm_packages/
 
+# wa-web.js
+.wwebjs_auth/
+.wwebjs_cache/
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
