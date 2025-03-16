@@ -5,9 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard WhatsApp</title>
 
+    <style>
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            width: 50%;
+            margin: 10% auto;
+            border-radius: 10px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .close-btn {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .chat-list {
+            display: flex;
+            flex-direction: column-reverse; /* Chat terbaru di atas */
+        }
+        .chat-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+
+    <script>
+          function logout() {
+            window.location.href = "/logout";
+            }
+    </script>
+
     
 </head>
 <body>
     <h1>Dashboard WhatsApp</h1>
+    <button onclick="connectWhatsApp()">Hubungkan WhatsApp</button>
+    <button onclick="logout()">Logout</button>
+    <button onclick="refreshStatus()" style="margin-bottom: 10px; background-color: #4C9ADF; color: white;">Refresh</button>
+    <button onclick="clearAllSessions()" style="margin-bottom: 10px; background-color: red; color: white;">Clear All Session</button>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nomor WA</th>
+                <th>Chat Masuk</th>
+                <th>Chat Keluar</th>
+                <th>Status</th>
+                <th>QR Code</th>
+                <th>Aksi</th>
+              
+            </tr>
+        </thead>
+        <tbody id="whatsappList">
+            <tr><td colspan="6">Memuat data...</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Modal Chat -->
+    <div id="chatModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">Chat</h3>
+            <div id="chatContainer" class="chat-list"></div>
+            <div style="text-align: right; margin-top: 10px;">
+                <button onclick="closeModal()" style="padding: 10px; background: red; color: white; border: none; border-radius: 5px;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk koneksi WhatsApp -->
+    <div id="waModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Scan QR Code</h3>
+            <p id="loadingText">Menunggu QR Code...</p>
+            <img id="qrCodeImg" src="" style="display: none; width: 200px; height: 200px;">
+        </div>
+    </div>
+
 </body>
 </html>
