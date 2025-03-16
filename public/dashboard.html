@@ -158,5 +158,50 @@
                     modal.style.display = "none";
                 });
         }
+
+
+        async function loadWhatsAppList() {
+            const response = await fetch('/whatsapp/list');
+            if (response.status === 401) {
+                window.location.href = "/";
+                return;
+            }
+            const data = await response.json();
+            console.log("Data WhatsApp List:", data); // Debugging
+
+            const listContainer = document.getElementById('whatsappList');
+            listContainer.innerHTML = '';
+
+            if (!Array.isArray(data) || data.length === 0) {
+                listContainer.innerHTML = "<tr><td colspan='7'>Belum ada koneksi WA</td></tr>";
+                return;
+            }
+
+            data.forEach(async (item, index) => {
+                const qrCode = await getQRCode(item.number);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.number}</td>
+                    <td><button onclick="showChat('${item.number}', 'in')">${item.chat_in}</button></td>
+                    <td><button onclick="showChat('${item.number}', 'out')">${item.chat_out}</button></td>
+                    <td>${item.connected ? '<b style="color:green">✅ Terhubung</b>' : '<b style="color:red">❌ Belum Terhubung</b>'}</td>
+                    <td>${qrCode ? `<img src="${qrCode}" width="150">` : 'Tidak ada QR'}</td>
+                    <td>
+                        <button onclick="disconnectWhatsApp('${item.number}')">Hapus</button>
+                    </td>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        // Panggil fungsi saat halaman selesai dimuat
+        document.addEventListener("DOMContentLoaded", loadWhatsAppList);
+
+        async function getQRCode(number) {
+            const response = await fetch(`/whatsapp/qrcode/${number}`);
+            const data = await response.json();
+            return data.qr;
+        }
 </script>
 </html>
