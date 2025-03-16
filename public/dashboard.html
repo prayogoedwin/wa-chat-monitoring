@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard WhatsApp</title>
+    <title>Dashboard - WhatsApp Chat Monitoring</title>
 
     <style>
         /* Modal Styling */
@@ -97,4 +97,66 @@
     </div>
 
 </body>
+
+<script>
+    function connectWhatsApp() {
+                let number = prompt("Masukkan Nomor WhatsApp:");
+                if (!number) return alert("Nomor tidak boleh kosong!");
+
+                // Tampilkan modal dengan loading text
+                let modal = document.getElementById("waModal");
+                let loadingText = document.getElementById("loadingText");
+                let qrCodeImg = document.getElementById("qrCodeImg");
+
+                modal.style.display = "flex";
+                loadingText.style.display = "block";
+                qrCodeImg.style.display = "none";
+                qrCodeImg.src = "";
+
+                // Panggil API untuk membuat koneksi WA
+                fetch("/whatsapp/connect", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ number })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Cek QR Code tiap 2 detik
+                        let interval = setInterval(() => {
+                            fetch(`/whatsapp/qrcode/${number}`)
+                            .then(res => res.json())
+                            .then(qrData => {
+                                if (qrData.qr) {
+                                    qrCodeImg.src = qrData.qr;
+                                    qrCodeImg.style.display = "block";
+                                    loadingText.style.display = "none";
+                                }
+                            });
+
+                            // Cek apakah sudah terhubung
+                            fetch("/whatsapp/list")
+                            .then(res => res.json())
+                            .then(list => {
+                                let waConnected = list.some(wa => wa.number === number && wa.connected);
+                                if (waConnected) {
+                                    clearInterval(interval);
+                                    modal.style.display = "none";
+                                    alert("WhatsApp Berhasil Terhubung!");
+                                    location.reload(); // Refresh daftar WA
+                                }
+                            });
+                        }, 2000);
+                    } else {
+                        alert("Gagal menghubungkan WhatsApp!");
+                        modal.style.display = "none";
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Terjadi kesalahan!");
+                    modal.style.display = "none";
+                });
+        }
+</script>
 </html>
